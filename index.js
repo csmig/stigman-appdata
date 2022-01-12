@@ -19,25 +19,26 @@ async function generateReviews (assetId, benchmarkId) {
         let rules = await getRules(benchmarkId)
         let results = generateResultSet( rules.length )
         for (let x=0, l=rules.length; x < l; x++) {
-            let action = null, actionComment = null
+            let comment = null
             if (results[x] === 'fail') {
-                action = getRandomInt(2) % 2 ? 'remediate' : 'mitigate'
-                actionComment = txtgen.paragraph(2)
+                comment = txtgen.paragraph(2)
             }
             reviews.push(
                 {
                     assetId: assetId,
                     ruleId: rules[x].ruleId,
                     result: results[x],
-                    resultComment: txtgen.paragraph(2),
+                    detail: txtgen.paragraph(2),
                     autoResult: false,
-                    action: action,
-                    actionComment: actionComment,
-                    status: getRandomInt(2) % 2 ? 'saved' : 'submitted', //Alternate between "saved" and "submitted",
+                    comment,
+                    status: {
+                        label: getRandomInt(2) % 2 ? 'saved' : 'submitted', //Alternate between "saved" and "submitted"
+                        text: null,
+                        user: { userId: 1},
+                        ts: "2020-06-03T20:36:31.000Z"
+                    }, 
                     userId: 1,
                     ts: "2020-06-03T20:36:31.000Z",
-                    rejectText: null,
-                    rejectUserId: null,
                     metadata: {},
                     history: []
                 }
@@ -54,7 +55,7 @@ async function getRules( benchmarkId ) {
     let connection
     try {
         connection = await mysql.createConnection({
-            host: 'localhost',
+            host: '192.168.1.214',
             port: 50001,
             user: 'stigman',
             password: 'stigman',
@@ -201,7 +202,7 @@ async function genNavyCollections() {
         //     'Keyport'
         // ]
         const locations = [
-            'Newport'
+            'Quahog'
         ]
         const oses = ['Windows', 'Linux', 'Servers']
 
@@ -247,7 +248,7 @@ async function genNavyCollections() {
                             stigGrants: stigGrants
                         })
                         for (let x=0, l=stigGrants.length; x<l; x++) {
-                            // console.error(`reviews ${stigGrants[x].benchmarkId}`)
+                            console.error(`reviews ${stigGrants[x].benchmarkId}`)
                             let reviews = await generateReviews(assetId.toString(), stigGrants[x].benchmarkId)
                             appdata.reviews = appdata.reviews.concat(reviews)
                         }
